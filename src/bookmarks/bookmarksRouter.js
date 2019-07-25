@@ -1,5 +1,7 @@
-const route = require('express').Router();
+const express = require('express');
 const bookmarksService = require('../service/bookmarks_service');
+const route = express.Router();
+const parse = express.json();
 
 route.get('/', (req, res, next) => {
   bookmarksService.getAllBookmarks(req.app.get('db'))
@@ -11,6 +13,21 @@ route.get('/', (req, res, next) => {
       console.log(err);
       next();
     });
+}).post('/', parse,(req, res, next)=>{
+  //check if all req items in item
+  let newItem;
+  if(!req.body.title || !req.body.url || !req.body.rating)
+    return res.status(400).json({error:'invalid bookmark'});
+  else
+    newItem = req.body;
+  bookmarksService.addBookmark(req.app.get('db'), newItem)
+    .then((newBook)=>{
+      res.status(201)
+        .location(`/bookmarks/${newBook[0].id}`)
+        .json(newBook); 
+    });
+  
+
 }); 
 
 function validateId(id){
@@ -36,6 +53,23 @@ route.get('/:id', (req, res, next) => {
     res.status(400);
     res.json({error:'invalid id'});
   }
-});
+}).patch('/:id',(req,res,next)=>{
+  let id = req.params.id;
+  let body;
+  if(!req._body)
+    return res.app(400).json({error:'invalid body'})
+  else
+    body = req.body;
+  if(validateId(id)){
+    bookmarksService.updateBookMark(req.app.get('db'),id,body)
+      .then(result => {
+        res.status(201).json(result);
+      }).catch(next);
+
+  }else{
+    res.status(404).json({error:'bookmark not found'});
+  }
+
+}).delete();
 
 module.exports = route;
