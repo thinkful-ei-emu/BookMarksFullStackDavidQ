@@ -53,13 +53,12 @@ route.get('/:id', (req, res, next) => {
     res.status(400);
     res.json({error:'invalid id'});
   }
-}).patch('/:id',(req,res,next)=>{
+}).patch('/:id',parse,(req,res,next)=>{
   let id = req.params.id;
-  let body;
-  if(!req._body)
-    return res.app(400).json({error:'invalid body'})
-  else
-    body = req.body;
+  let {title,url,rating,description} = req.body;
+  let body ={title,url,rating,description};
+  if(!body.title && !body.url && !body.rating &&!body.description)
+    return res.status(400).json({error:'invalid change'});
   if(validateId(id)){
     bookmarksService.updateBookMark(req.app.get('db'),id,body)
       .then(result => {
@@ -70,6 +69,16 @@ route.get('/:id', (req, res, next) => {
     res.status(404).json({error:'bookmark not found'});
   }
 
-}).delete();
+}).delete('/:id',(req,res,next)=>{
+  let id = req.params.id;
+  if(validateId(id)){
+    bookmarksService.deleteBookMark(req.app.get('db'),id)
+      .then(()=>{
+        res.status(204).end();
+      }).catch(next);
+  }
+  else
+    res.status(404).json({error:'bookmark not found'}); 
+});
 
 module.exports = route;

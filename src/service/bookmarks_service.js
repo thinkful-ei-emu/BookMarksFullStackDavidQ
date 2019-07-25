@@ -9,7 +9,7 @@ const bookmarksService = {
     return db('bookmarks').insert(newBook).returning('*');
   },
   updateBookMark(db,id,update){
-    return db('bookmarks').where({id}).update({update});
+    return db('bookmarks').where({id}).update(update).returning();
   },
   deleteBookMark(db,id){
     return db('bookmarks').where({id}).delete();

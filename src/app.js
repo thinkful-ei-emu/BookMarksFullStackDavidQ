@@ -33,6 +33,7 @@ app.use((err, req, res, next)=>{
     console.log(err);
     response = {error:{message:'Critical Server Error'}};
   }else{
+    console.error(err);
     response = {error:{message:err.message,err}};
   }
   res.status(500).json(response);

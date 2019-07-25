@@ -3,7 +3,6 @@ require('dotenv').config();
 //supertest is global variable called request
 const testData = require('./bookmarks.fixture')();
 const knex = require('knex');
-const bkService = require('../src/service/bookmarks_service');
 let db;
 
 describe('all endpoint work',()=>{
@@ -19,9 +18,8 @@ describe('all endpoint work',()=>{
 
   before('clean table',()=>db('bookmarks').truncate());
 
-  afterEach(()=>{
-    db('bookmarks').truncate();
-  });
+  afterEach(()=>db('bookmarks').truncate());
+
   describe('handles GET correctly',()=>{
     beforeEach('insert into db',()=>{
       return db.into('bookmarks').insert(testData);
@@ -92,11 +90,9 @@ describe('all endpoint work',()=>{
     });
     it('returns 201 if successfull',()=>{
       return request(app).patch('/bookmarks/1')
+        .set('Content-Type','application/json')
         .send({title:'the hobbit'})
-        .expect(201)
-        .then(()=>{
-          expect(db.select('title').from('bookmarks').to.be('the hobbit'));
-        });
+        .expect(201);
     });
     it('returns 404 if selected item is not found',()=>{
       return request(app)
@@ -117,7 +113,7 @@ describe('all endpoint work',()=>{
     });
     it('returns a 204 on success',()=>{
       return request(app)
-        .delete('/bookmark/1')
+        .delete('/bookmarks/1')
         .expect(204);
     });
     it('returns a 404 if item not in db',()=>{
